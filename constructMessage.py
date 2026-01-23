@@ -29,8 +29,10 @@ def constructMessage(writing, colour, distractor_color=None):
 
 
 def constructImage(full_image_path):
+    # filepath to first frame
     try:
         img = PIL.Image.open(full_image_path)
+        img = img.convert("RGB")
         img.load()
         return img
     except FileNotFoundError:
