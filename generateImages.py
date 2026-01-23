@@ -68,7 +68,7 @@ def get_random_point_in_circle(center_x, center_y, radius):
     
     return x, y
 
-def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorShape, 
+def generate_images(dir, num_images, distractor_set ,c, targetShape, distractorShape, 
                     shapeSize, theta_min, theta_max, targetColour, distractorColour, bgColour="white", conjunctive=False,
                     grid_rows=2, grid_cols=2, targetSize=None, quadrantOrder=None, debug=False, present=False, colourMode="explicit", colourList=None, 
                     min_spacing=0, min_target_spacing=None, max_centre_dist=None):
@@ -77,7 +77,7 @@ def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorSha
         min_target_spacing = min_spacing
 
     # Set image dimensions
-    width, height = 400, 400  # You can adjust the size as needed
+    width, height = round((400*16)/9), 400  # You can adjust the size as needed
 
     screen_center_x = width / 2
     screen_center_y = height / 2
@@ -107,7 +107,7 @@ def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorSha
     with open(os.path.join(output_dir, 'annotations.csv'), mode='w', newline='') as csv_file:
         fieldnames = ['filename', 'shape_type', 'target', 'center_x', 'center_y', 'size',
                       'color', 'quadrant', 'row', 'column', 'num_distractors', 'num_images', 'distractor_color',
-                      'color_bin_index', 'rotation_angle']
+                      'color_bin_index', 'rotation_angle', 'bin_group']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -139,7 +139,7 @@ def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorSha
                 targetPresent = True
 
             # Randomly select k independently
-            k = random.randint(min_k, max_k)
+            k = random.choice(distractor_set)
 
             # Create a new image with a white background
             bg_rgb = ImageColor.getrgb(bgColour)
@@ -303,7 +303,23 @@ def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorSha
                 column_number=col_index+1
                 # Save the image filename
                 filename = f'image_{i}.png'
-
+                #calculate the bin 
+                def bin_group_calc(k):
+                    if 1<= k <= 4 :
+                        return 1
+                    elif 5 <= k <= 8:
+                        return 2
+                    elif 9 <= k <= 16:
+                        return 3
+                    elif 17 <= k <= 32:
+                        return 4
+                    elif 33 <= k <= 64:
+                        return 5
+                    elif 65 <= k <= 99:
+                        return 6
+                    else:
+                        return "NA"
+                bin_number = bin_group_calc(k)
                 # Write the annotation for the target
                 writer.writerow({
                     'filename': filename,
@@ -320,7 +336,8 @@ def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorSha
                     'num_images': num_images,      # Include num_images in the CSV
                     'distractor_color': 'various' if c == -1 else target_color_hex,
                     'color_bin_index': target_color_bin_index,  # None when c == -1
-                    'rotation_angle': target_rotation          # Include rotation angle
+                    'rotation_angle': target_rotation ,         # Include rotation angle
+                    'bin_group': bin_number
                 })
 
             # For c == -2, select one distractor to be targetColour
@@ -529,6 +546,24 @@ def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorSha
 
                 column_number= col_index+1
                 row_number=row_index+1
+                #calculate the bin 
+                def bin_group_calc(k):
+                    if 1<= k <= 4 :
+                        return 1
+                    elif 5 <= k <= 8:
+                        return 2
+                    elif 9 <= k <= 16:
+                        return 3
+                    elif 17 <= k <= 32:
+                        return 4
+                    elif 33 <= k <= 64:
+                        return 5
+                    elif 65 <= k <= 99:
+                        return 6
+                    else:
+                        return "NA"
+                bin_number = bin_group_calc(k)
+                
                 # Write the annotation for the distractor
                 filename=f'image_{i}.png'
                 writer.writerow({
@@ -546,14 +581,15 @@ def generate_images(dir, num_images, min_k, max_k, c, targetShape, distractorSha
                     'num_images': '',                   # Empty for distractors
                     'distractor_color': distractor_color_hex,
                     'color_bin_index': distractor_color_bin_index,  # None when c == -1
-                    'rotation_angle': distractor_rotation
+                    'rotation_angle': distractor_rotation,
+                    'bin_group': bin_number
                 })
 
             # Save the image
             filename = f'image_{i}.png'
             image.save(os.path.join(output_dir, filename))
 
-    print(f"Generated {num_images} images in the '{output_dir}' directory with k ranging from {min_k} to {max_k}, c = {c}, and rotations between {theta_min}° and {theta_max}°.")
+    print(f"Generated {num_images} images in the '{output_dir}' directory with k selected from {distractor_set}, c = {c}, and rotations between {theta_min}° and {theta_max}°.")
 
 
 def draw_shape(canvas_size, shapeSize, shape, color):
@@ -809,15 +845,14 @@ if __name__ == '__main__':
     presets = {
         "2Among5Colour": {
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": range(1,99),
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
             "shapeSize": 20,
             "theta_min": 0,
             "theta_max": 360,
-            "targetColour": "#00FF00",
+            "targetColour": "#FF0000",
             "distractorColour": "#0000FF",
             "quadrantOrder": [1, 2, 3, 4],
             "debug": False,
@@ -826,8 +861,7 @@ if __name__ == '__main__':
         },
         "2Among5ColourRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -845,8 +879,7 @@ if __name__ == '__main__':
         },
         "2Among5NoColourRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": range(1,99),
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -884,8 +917,7 @@ if __name__ == '__main__':
 
         "2Among5ConjRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -904,8 +936,7 @@ if __name__ == '__main__':
 
         "5Among2ColourRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "5",
             "distractorShape": "2",
@@ -924,8 +955,7 @@ if __name__ == '__main__':
 
         "5Among2ConjRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": range(1,99),
             "c": 1,
             "targetShape": "5",
             "distractorShape": "2",
@@ -944,8 +974,7 @@ if __name__ == '__main__':
 
         "5Among2NoColourRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "5",
             "distractorShape": "2",
@@ -964,8 +993,7 @@ if __name__ == '__main__':
 
         "conjunctive": {
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": range(1,99),
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -998,8 +1026,7 @@ if __name__ == '__main__':
         },
         "2Among5ColourPresent": {
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -1016,8 +1043,7 @@ if __name__ == '__main__':
 
         "2Among5ColourPresentRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -1035,8 +1061,7 @@ if __name__ == '__main__':
         },
         "2Among5NoColourPresentRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -1055,8 +1080,7 @@ if __name__ == '__main__':
 
         "5Among2ColourPresentRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "5",
             "distractorShape": "2",
@@ -1074,8 +1098,7 @@ if __name__ == '__main__':
         },
         "5Among2NoColourPresentRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
             "c": 1,
             "targetShape": "5",
             "distractorShape": "2",
@@ -1095,15 +1118,14 @@ if __name__ == '__main__':
 
         "2Among5NoColour": {
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": range(1,99),
             "c": 0,
             "targetShape": "2",
             "distractorShape": "5",
             "shapeSize": 20,
             "theta_min": 0,
             "theta_max": 360,
-            "targetColour": "#00FF00",
+            "targetColour": "#FF0000",
             "distractorColour": "",
             "quadrantOrder": [1, 2, 3, 4],
             "debug": False,
@@ -1112,8 +1134,7 @@ if __name__ == '__main__':
         },
         "2Among5NoColourPresent": {
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": 99,
+            "distractor_set": range(1,99),
             "c": 0,
             "targetShape": "2",
             "distractorShape": "5",
@@ -1355,8 +1376,7 @@ if __name__ == '__main__':
     else:
         config = {
             "num_images": args.number if args.number is not None else 1000,
-            "min_k": 0,
-            "max_k": args.distractors if args.distractors is not None else 99,
+            "distractor_set": range(1,99),
             "c": args.colour if args.colour is not None else 0,
             "targetShape": args.target if args.target is not None else "2",
             "distractorShape": args.distractor if args.distractor is not None else "5",

@@ -1,55 +1,41 @@
-def constructMessage(writing, shape, colour, image, model, finetuning=False, solution=None):
+import PIL.Image
+
+colourMap = {
+    "#FF0000": "red", 
+    "#00FF00": "green", 
+    "#0000FF": "blue", 
+    "#000000": "black",
+    "#FFFFFF": "white"
+}
+
+def constructMessage(writing, colour, distractor_color=None):
+    # Map Hex colors to English names
+    target_color_name = colourMap.get(colour, "colored")
+    dist_color_name = colourMap.get(distractor_color, "colored") if distractor_color else "various colored"
+
+    # define prompt
     prompts = { 
-             "LightPriorsOOO": f"The image is divided into a 2x2 grid. Each element of the grid is referred to as a cell. In the presented image there are a number of spheres lit from different directions. Almost all of the spheres are lit from the same direction, but one sphere is lit from the opposite direction. In which cell is this oppositely lit sphere? In the case where the sphere overlaps multiple cells, please provide the cell where the centre of the sphere lit from the opposite direction is located. Please only respond with 'Cell (i,j)' where (i,j) corresponds to the ith row and jth column of the grid. The top left cell is Cell (1,1). If you are uncertain please guess but optionally add a description to note this. However, for ease of processing please begin your response with 'Cell (i,j)'.",
-            "std2x2-2Among5": f"The image is divided into a 2x2 grid. Each element of the grid is referred to as a cell. In the presented image there are a number of objects. Almost all of the objects are the number 5 written as a numeral. There is a single 2 in the image, similarly represented by a numeral. In which cell is the 2 in? In the case where the 2 overlaps multiple cells, please provide the cell where the centre of the 2 is located. Please only respond with 'Cell (i,j)' where (i,j) corresponds to the ith row and jth column of the grid. The top left cell is Cell (1,1). Do not reply with anything else.",         
-               "std2x2-5Among2": f"The image is divided into a 2x2 grid. Each element of the grid is referred to as a cell. In the presented image there are a number of objects. Almost all of the objects are the number 2 written as a numeral. There is a single 5 in the image, similarly represented by a numeral. In which cell is the 5 in? In the case where the 5 overlaps multiple cells, please provide the cell where the centre of the 5 is located. Please only respond with 'Cell (i,j)' where (i,j) corresponds to the ith row and jth column of the grid. The top left cell is Cell (1,1). Do not reply with anything else.",              
-               "std2x2-2Among5-conj": f"The image is divided into a 2x2 grid. Each element of the grid is referred to as a cell. In the presented image there are a number of objects. There are '2's and '5's written as numerals. In which cell is the {colour} '{shape}'? In the case where the {colour} {shape} overlaps multiple cells, please provide the cell where the centre of the {shape} is located. Please only respond with 'Cell (i,j)' where (i,j) corresponds to the ith row and jth column of the grid. The top left cell is Cell (1,1). If you are uncertain you may optionally add a note explaining that but please start your response with 'Cell (i,j)'.",
-               "coords-2Among5": f"The presented image is 400x400 pixels large, and the origin (0,0) is in the top left of the image. In the presented image there are a number of objects. Almost all of the objects are the number 5 written as a numeral. There is a single 2 in the image, similarly represented by a numeral. What are the coordinates of the centre of the 2? Please give your best estimate. If you are uncertain please guess but optionally add a description to note this. However, for ease of processing please begin your response with a set of coordinates using round brackets.",
-               "coords-5Among2": f"The presented image is 400x400 pixels large, and the origin (0,0) is in the top left of the image. In the presented image there are a number of objects. Almost all of the objects are the number 2 written as a numeral. There is a single 5 in the image, similarly represented by a numeral. What are the coordinates of the centre of the 5? Please give your best estimate. If you are uncertain please guess but optionally add a description to note this. However, for ease of processing please begin your response with a set of coordinates using round brackets.",
-               "coords-2Among5-conj": f"The presented image is 400x400 pixels large, and the origin (0,0) is in the top left of the image. In the presented image there are a number of objects. There are '2's and '5's written as numerals. What are the coordinates of the {colour} '{shape}'? Please give your best estimate. If you are uncertain please guess but optionally add a description to note this. However, for ease of processing please begin your response with a set of coordinates using round brackets.",
-               "circle-sizes": f"The image is divided into a 2x2 grid. Each element of the grid is referred to as a cell. In the presented image there are a number of circles. One of the circles is larger than the rest. In which cell is the larger circle? In the case where the larger circle overlaps multiple cells, please provide the cell where the centre of the larger circle is located. Please only respond with 'Cell (i,j)' where (i,j) corresponds to the ith row and jth column of the grid. The top left cell is Cell (1,1). If you are uncertain you may optionally add a note explaining that but please start your response with 'Cell (i,j)'.",
-               "coords-circle-sizes": f"The presented image is 400x400 pixels large, and the origin (0,0) is in the top left of the image. In the presented image there are a number of circles. One of the circles is larger than the others. What are the coordinates of the larger circle? Please give your best estimate. If you are uncertain please guess but optionally add a description to note this. However, for ease of processing please begin your response with a set of coordinates using round brackets.",
-               "std2x2-TAmongL": f"The image is divided into a 2x2 grid. Each element of the grid is referred to as a cell. In the presented image there are a number of objects. Almost all of the objects are the letter L. There is a single T in the image. In which cell is the T in? In the case where the T overlaps multiple cells, please provide the cell where the centre of the T is located. Please only respond with 'Cell (i,j)' where (i,j) corresponds to the ith row and jth column of the grid. The top left cell is Cell (1,1). Do not reply with anything else.",
-               "LightPriorsOOO": f"The image is divided into a 2x2 grid. Each element of the grid is referred to as a cell. In the presented image there are a number of spheres lit from different directions. Almost all of the spheres are lit from the same direction, but one sphere is lit from the opposite direction. In which cell is this oppositely lit sphere? In the case where the sphere overlaps multiple cells, please provide the cell where the centre of the sphere lit from the opposite direction is located. Please only respond with 'Cell (i,j)' where (i,j) corresponds to the ith row and jth column of the grid. The top left cell is Cell (1,1). If you are uncertain please guess but optionally add a description to note this. However, for ease of processing please begin your response with 'Cell (i,j)'.",
-               "coords-LightPriorsOOO": f"The presented image is 400x400 pixels large, and the origin (0,0) is in the top left of the image. In the presented image there are a number of spheres lit from different directions. Almost all of the spheres are lit from the same direction, but one sphere is lit from the opposite direction. What are the coordinates of the centre of the oppositely lit sphere? If you are uncertain please guess but optionally add a description to note this. However, for ease of processing please begin your response with a set of coordinates using round brackets.",
-               }
-    message = []
+        "2Among5-prompt-Col": (
+            f"The camera is fixed and completely stationary. The {dist_color_name} digits 5 remain static and unchanged. The single {target_color_name} digit 2 becomes the sole focus; starting at one second, a circle appears around it.No camera movement, no zooming, no panning. The digits do not move or change position."
+        ),         
+        "5Among2-prompt-NoCol": (
+            f"The camera is fixed and completely stationary. The {dist_color_name} digits 2 remain static and unchanged. The single {target_color_name} digit 5 becomes the sole focus; starting at one second, a circle appears around it.No camera movement, no zooming, no panning. The digits do not move or change position."
+        ),         
+        "2Among5-prompt-Conj": (
+            f"The camera is fixed and completely stationary. The mixed {target_color_name} and {dist_color_name} digits remain static. The single {target_color_name} digit 2 becomes the sole focus; starting at one second, a circle appears around it. No camera movement, no zooming, no panning."
+        ),         
+    }
+    return prompts[writing]
 
 
-    gpt_models =  ["gpt-4o", "gpt-4-turbo"]
-    claude_models = ["claude-sonnet", "claude-sonnet37", "claude-haiku"]
-    together_models = ["deepseek-v3", "llama-3.3-70b", "qwen-2.5-72b", "llama-3.2-90b", "deepseek-vl2", "qwen-vl-32b", "qwen-vl-7b","llama-vision-11b", "llama-vision-34b", "internvl3-8b", "internvl3-38b"]
-
-    if model in gpt_models or "llama" in model:
-        message.append({"role": "system", "content": "You are an AI assistant that can analyze images and answer questions about them."})
-
-
-
-
-
-    content = []
-    
-    if model =="llamaLocal":
-        content.append({"type": "image"})
-
-
-    content.append({"type": "text", "text": prompts[writing]})
-
-
-    if model in gpt_models or model=="llama11B" or model=="llama90B" or model in together_models:
-        content.append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image}"}})
-    elif model in claude_models:
-        content.append({"type": "image", "source": {"type": "base64", "media_type":"image/png", "data":image}})
-    elif model == "llamaLocal":
-        pass
-    else:
-        raise ValueError("Incorrect Model Type")
-
-    message.append({"role": "user", "content":content})
-
-    if finetuning:
-        message.append({"role": "assistant", "content": str(solution)})
-
-
-
-    return message
+def constructImage(full_image_path):
+    try:
+        img = PIL.Image.open(full_image_path)
+        img.load()
+        return img
+    except FileNotFoundError:
+        print(f"Error: The file at {full_image_path} was not found.")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred while loading the image: {e}")
+        return None
