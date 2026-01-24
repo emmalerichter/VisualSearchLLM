@@ -19,19 +19,22 @@ def sample_img_bin ():
         csv_path = os.path.join(folder_path, "annotations.csv")
         
         if not os.path.exists(csv_path):
-                print(f"Skipping {condition}: CSV not found.")
-                continue
+            raise FileNotFoundError(f"Missing critical metadata: {csv_path}. Data collection cannot proceed without annotations.")
         df = pd.read_csv(csv_path)
 
         for bin_id in range(1,7):
             bin_data = df[df['bin_group']== bin_id]
             if bin_data.empty:
-                continue
+                raise RuntimeError(f"Data imbalance detected: Bin {bin_id} in {condition} is empty. Expected {samples_per_bin} images.")
+            if len(bin_data) < samples_per_bin:
+                raise ValueError(f"Insufficient data in {condition} Bin {bin_id}: Found {len(bin_data)}, need {samples_per_bin}.")
             samples = bin_data.sample(n=min(len(bin_data), samples_per_bin))
             
             for idx,(_,row) in enumerate(samples.iterrows()):
                 image_filename = row['filename']
                 full_image_path = os.path.join(folder_path, image_filename)
+                if not os.path.exists(full_image_path):
+                    raise FileNotFoundError(f"Image file referenced in CSV does not exist: {full_image_path}")
                 #prompt selection
                 prompt_key = "2Among5-prompt-Conj" if "2Among5Conjunctive" in condition else \
                 ("2Among5-prompt-Col" if "2Among5Colour" in condition else "5Among2-prompt-NoCol")
@@ -42,6 +45,8 @@ def sample_img_bin ():
                         distractor_color=row.get('distractor_color'))
                 
                 input_image = constructImage(full_image_path) # ifx in constructMessage.py
+                if input_image is None:
+                    raise RuntimeError(f"Failed to process image object for: {full_image_path}")
                 
                 output_name = f"{condition}_Bin{bin_id}_Sample{idx+1}.mp4"
                 print(f"Submitting: {output_name}")
@@ -55,10 +60,12 @@ def sample_img_bin ():
                     "op": operation,
                     "filename": output_name,
                     "condition": condition,
-                    "bin": bin_id
+                    "bin": bin_id,
+                    "done": False
                 })
 
 def monitor_and_safe():
+    print(f"\nMonitoring {len(active_operations)} total video tasks...")
     completed_count = 0
     total = len(active_operations)
 
@@ -70,15 +77,31 @@ def monitor_and_safe():
             op = client.models.get_operation(task["op"].name)
             
             if op.done:
+                if op.error:
+                    raise RuntimeError(
+                        f"API Error during generation of {task['filename']}: "
+                        f"Code {op.error.code} - {op.error.message}. "
+                        "This may be due to safety filters or quota limits."
+                    )
+
+                if not op.response or not op.response.generated_videos:
+                    raise ValueError(f"API returned a successful 'done' status for {task['filename']} but no video data was found.")
+
                 video = op.response.generated_videos[0]
                 
-                # Save logic
                 save_dir = os.path.join("veo_results", task["condition"], f"Bin_{task['bin']}")
-                os.makedirs(save_dir, exist_ok=True)
+                try:
+                    os.makedirs(save_dir, exist_ok=True)
+                except Exception as e:
+                    raise OSError(f"Failed to create directory {save_dir}: {e}")
+
                 save_path = os.path.join(save_dir, task["filename"])
                 
-                video.video.save(save_path)
-                print(f"Successfully saved: {save_path}")
+                try:
+                    video.video.save(save_path)
+                    print(f"Successfully saved: {save_path}")
+                except Exception as e:
+                    raise IOError(f"Failed to save video to {save_path}: {e}")
                 
                 task["done"] = True
                 completed_count += 1
