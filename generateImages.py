@@ -138,8 +138,13 @@ def generate_images(dir, num_images, distractor_set ,c, targetShape, distractorS
             else:
                 targetPresent = True
 
-            # Randomly select k independently
-            k = random.choice(distractor_set)
+            # select k depending upon the distractor_set provided. If it's a range, it will select a random number from that range. If it's a list of tuples, it will randomly select a tuple and then select a random number from within that tuple's range.
+            if isinstance(distractor_set[0], tuple):
+                selected_bin = random.choice(distractor_set)
+                k = random.randint(selected_bin[0], selected_bin[1])
+            else:
+                k = random.choice(distractor_set)
+                
 
             # Create a new image with a white background
             bg_rgb = ImageColor.getrgb(bgColour)
@@ -845,7 +850,7 @@ if __name__ == '__main__':
     presets = {
         "2Among5Colour": {
             "num_images": args.number if args.number is not None else 1000,
-            "distractor_set": range(1,99),
+            "distractor_set": [(1, 4), (5, 8), (9, 16), (17, 32), (33, 64), (65, 99)],
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
@@ -917,21 +922,38 @@ if __name__ == '__main__':
 
         "2Among5ConjRand":{        
             "num_images": args.number if args.number is not None else 1000,
-            "distractor_set": [0, 1, 2, 3, 5, 10, 15, 20, 30, 50],
+            "distractor_set": [(1, 4), (5, 8), (9, 16), (17, 32), (33, 64), (65, 99)],
             "c": 1,
             "targetShape": "2",
             "distractorShape": "5",
             "shapeSize": 20,
             "theta_min": 0,
             "theta_max": 360,
-            "targetColour": "#00FF00",
+            "targetColour": "#FF0000",
             "distractorColour": "#0000FF",
             "quadrantOrder": [1, 2, 3, 4],
             "debug": False,
             "present": False,
             "conjunctive": True,
             "colourMode": "randomDifferent",
-            "colourList": ["#FF0000", "#00FF00", "#0000FF"]
+            "colourList": ["#FF0000", "#0000FF"]
+        },
+
+        "2Among5ConjRed":{
+            "num_images": args.number if args.number is not None else 1000,
+            "distractor_set": [(1, 4), (5, 8), (9, 16), (17, 32), (33, 64), (65, 99)],
+            "c": 1,
+            "targetShape": "2",
+            "distractorShape": "5",
+            "shapeSize": 20,
+            "theta_min": 0,
+            "theta_max": 360,
+            "targetColour": "#FF0000",
+            "distractorColour": "#0000FF",
+            "quadrantOrder": [1, 2, 3, 4],
+            "debug": False,
+            "present": False,
+            "conjunctive": True
         },
 
         "5Among2ColourRand":{        
@@ -1118,7 +1140,7 @@ if __name__ == '__main__':
 
         "2Among5NoColour": {
             "num_images": args.number if args.number is not None else 1000,
-            "distractor_set": range(1,99),
+            "distractor_set": [(1, 4), (5, 8), (9, 16), (17, 32), (33, 64), (65, 99)],
             "c": 0,
             "targetShape": "2",
             "distractorShape": "5",

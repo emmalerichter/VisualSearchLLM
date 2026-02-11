@@ -44,7 +44,7 @@ def sample_img_bin ():
                         colour=row['color'],
                         distractor_color=row.get('distractor_color'))
                 
-                input_image = constructImage(full_image_path) # ifx in constructMessage.py
+                input_image = constructImage(full_image_path)
                 if input_image is None:
                     raise RuntimeError(f"Failed to process image object for: {full_image_path}")
                 
