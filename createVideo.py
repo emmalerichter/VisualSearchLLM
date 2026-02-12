@@ -54,8 +54,12 @@ def sample_img_bin ():
                 operation = client.models.generate_videos(
                     model="veo-3.1-generate-preview",
                     prompt=prompt_text,
-                    image = input_image # in batches put in above stratified images with respective prompt
+                    image=input_image,  # in batches put in above stratified images with respective prompt
+                    config=types.GenerateVideosConfig(
+                        number_of_videos=1,
+                        durationSeconds=4
                     )
+                )
                 active_operations.append({
                     "op": operation,
                     "filename": output_name,
@@ -64,6 +68,7 @@ def sample_img_bin ():
                     "done": False
                 })
 
+# saved along structure in the directory that specefies under veo_results the condition and the bin_X; herein the filename is defined as condtion_Bin_'_SampleID.mp4
 def monitor_and_safe():
     print(f"\nMonitoring {len(active_operations)} total video tasks...")
     completed_count = 0
@@ -89,7 +94,7 @@ def monitor_and_safe():
 
                 video = op.response.generated_videos[0]
                 
-                save_dir = os.path.join("veo_results", task["condition"], f"Bin_{task['bin']}")
+                save_dir = os.path.join("veo_results", task["condition"], f"Bin_{task['bin']}") 
                 try:
                     os.makedirs(save_dir, exist_ok=True)
                 except Exception as e:
