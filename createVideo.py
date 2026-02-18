@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import time
 from google import genai
+from google.genai import types
 from constructMessage import constructMessage
 from constructMessage import constructImage
 
@@ -12,6 +13,7 @@ conditions = ["2Among5Colour", "2Among5NoColour", "2Among5Conjunctive"]
 base_dir = "Images"
 samples_per_bin = 6
 active_operations = []
+RANDOM_SEED = 36
 
 def sample_img_bin ():
     for condition in conditions: 
@@ -28,7 +30,7 @@ def sample_img_bin ():
                 raise RuntimeError(f"Data imbalance detected: Bin {bin_id} in {condition} is empty. Expected {samples_per_bin} images.")
             if len(bin_data) < samples_per_bin:
                 raise ValueError(f"Insufficient data in {condition} Bin {bin_id}: Found {len(bin_data)}, need {samples_per_bin}.")
-            samples = bin_data.sample(n=min(len(bin_data), samples_per_bin))
+            samples = bin_data.sample(n=min(len(bin_data), samples_per_bin, random_state=RANDOM_SEED))
             
             for idx,(_,row) in enumerate(samples.iterrows()):
                 image_filename = row['filename']
@@ -56,8 +58,8 @@ def sample_img_bin ():
                     prompt=prompt_text,
                     image=input_image,  # in batches put in above stratified images with respective prompt
                     config=types.GenerateVideosConfig(
-                        number_of_videos=1,
-                        durationSeconds=4
+                        number_of_videos = 1,
+                        durationSecond = 4
                     )
                 )
                 active_operations.append({

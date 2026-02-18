@@ -16,13 +16,13 @@ def constructMessage(writing, colour, distractor_color=None):
     # define prompt
     prompts = { 
         "2Among5-prompt-Col": (
-            f"The camera is fixed and completely stationary. The {dist_color_name} digits 5 remain static and unchanged. The single {target_color_name} digit 2 becomes the sole focus; starting at one second, a circle appears around it. No camera movement, no zooming, no panning. The digits do not move or change position."
+            f"The {target_color_name} digit 2 becomes the sole focus; starting at one second, a black circle appears around it. Static camera perspective, no zoom no pan no movement no dolly no rotation."
         ),         
         "5Among2-prompt-NoCol": (
-            f"The camera is fixed and completely stationary. The {dist_color_name} digits 2 remain static and unchanged. The single {target_color_name} digit 5 becomes the sole focus; starting at one second, a circle appears around it.No camera movement, no zooming, no panning. The digits do not move or change position."
+            f"The {target_color_name} digit 2 becomes the sole focus; starting at one second, a black circle appears around it. Static camera perspective, no zoom no pan no movement no dolly no rotation."
         ),         
         "2Among5-prompt-Conj": (
-            f"The camera is fixed and completely stationary. The mixed {target_color_name} and {dist_color_name} digits remain static. The single {target_color_name} digit 2 becomes the sole focus; starting at one second, a circle appears around it. No camera movement, no zooming, no panning."
+            f"The {target_color_name} digit 2 becomes the sole focus; starting at one second, a black circle appears around it. Static camera perspective, no zoom no pan no movement no dolly no rotation."
         ),         
     }
     return prompts[writing]
