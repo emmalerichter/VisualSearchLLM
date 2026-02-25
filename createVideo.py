@@ -9,9 +9,9 @@ from constructMessage import constructImage
 # Insert API Access!!
 client = genai.Client(api_key = "DEFINE")
 
-conditions = ["2Among5Colour", "2Among5NoColour", "2Among5Conjunctive"]
+conditions = ["2Among5Colour"]
 base_dir = "Images"
-samples_per_bin = 6
+samples_per_bin = 1
 active_operations = []
 RANDOM_SEED = 36
 
