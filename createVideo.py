@@ -24,7 +24,7 @@ def sample_img_bin ():
             raise FileNotFoundError(f"Missing critical metadata: {csv_path}. Data collection cannot proceed without annotations.")
         df = pd.read_csv(csv_path)
 
-        for bin_id in range(1,7):
+        for bin_id in range(1,2):
             bin_data = df[df['bin_group']== bin_id]
             if bin_data.empty:
                 raise RuntimeError(f"Data imbalance detected: Bin {bin_id} in {condition} is empty. Expected {samples_per_bin} images.")
