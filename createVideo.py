@@ -1,67 +1,82 @@
-import os 
+import os
 import pandas as pd
 import time
 from google import genai
 from google.genai import types
 from constructMessage import constructMessage
 from constructMessage import constructImage
+from APIAccess import api_key_hide
 
-# Insert API Access!!
-client = genai.Client(api_key = "DEFINE")
+client = genai.Client(api_key=api_key_hide, http_options={'api_version': 'v1beta'})
 
 conditions = ["2Among5Colour"]
-base_dir = "Images"
-samples_per_bin = 1
+base_dir = "results/Images"
+samples_per_bin = 6
 active_operations = []
+generation_log = []
 RANDOM_SEED = 36
+LOG_PATH = "veo_results/generation_log.csv"
 
-def sample_img_bin ():
-    for condition in conditions: 
+ 
+def save_log():
+    """Save the current generation log to CSV, appending or creating."""
+    os.makedirs("veo_results", exist_ok=True)
+    log_df = pd.DataFrame(generation_log)
+    log_df.to_csv(LOG_PATH, index=False)
+ 
+ 
+def sample_img_bin():
+    submission_counter = 0
+ 
+    for condition in conditions:
         folder_path = os.path.join(base_dir, condition)
         csv_path = os.path.join(folder_path, "annotations.csv")
-        
+ 
         if not os.path.exists(csv_path):
-            raise FileNotFoundError(f"Missing critical metadata: {csv_path}. Data collection cannot proceed without annotations.")
+            raise FileNotFoundError(f"Missing critical metadata: {csv_path}.")
+ 
         df = pd.read_csv(csv_path)
-
-        for bin_id in range(1,2):
-            bin_data = df[df['bin_group']== bin_id]
+ 
+        for bin_id in range(1, 2):
+            bin_data = df[df['bin_group'] == bin_id]
+ 
             if bin_data.empty:
-                raise RuntimeError(f"Data imbalance detected: Bin {bin_id} in {condition} is empty. Expected {samples_per_bin} images.")
+                raise RuntimeError(f"Bin {bin_id} in {condition} is empty.")
             if len(bin_data) < samples_per_bin:
-                raise ValueError(f"Insufficient data in {condition} Bin {bin_id}: Found {len(bin_data)}, need {samples_per_bin}.")
-            samples = bin_data.sample(n=min(len(bin_data), samples_per_bin, random_state=RANDOM_SEED))
-            
-            for idx,(_,row) in enumerate(samples.iterrows()):
+                raise ValueError(f"Insufficient data in {condition} Bin {bin_id}.")
+ 
+            samples = bin_data.sample(n=min(len(bin_data), samples_per_bin), random_state=RANDOM_SEED)
+ 
+            for idx, (_, row) in enumerate(samples.iterrows()):
                 image_filename = row['filename']
                 full_image_path = os.path.join(folder_path, image_filename)
+ 
                 if not os.path.exists(full_image_path):
-                    raise FileNotFoundError(f"Image file referenced in CSV does not exist: {full_image_path}")
-                #prompt selection
+                    raise FileNotFoundError(f"Image not found: {full_image_path}")
+ 
                 prompt_key = "2Among5-prompt-Conj" if "2Among5Conjunctive" in condition else \
-                ("2Among5-prompt-Col" if "2Among5Colour" in condition else "5Among2-prompt-NoCol")
-                
+                             ("2Among5-prompt-Col" if "2Among5Colour" in condition else "5Among2-prompt-NoCol")
+ 
                 prompt_text = constructMessage(
-                        writing=prompt_key,
-                        colour=row['color'],
-                        distractor_color=row.get('distractor_color'))
-                
+                    writing=prompt_key,
+                    colour=row['color'],
+                    distractor_color=row.get('distractor_color'))
+ 
                 input_image = constructImage(full_image_path)
                 if input_image is None:
-                    raise RuntimeError(f"Failed to process image object for: {full_image_path}")
-                
+                    raise RuntimeError(f"Failed to process image: {full_image_path}")
+ 
                 output_name = f"{condition}_Bin{bin_id}_Sample{idx+1}.mp4"
-                print(f"Submitting: {output_name}")
-                
+                submission_counter += 1
+                print(f"Submitting ({submission_counter}): {output_name}")
+ 
                 operation = client.models.generate_videos(
-                    model="veo-3.1-generate-preview",
+                    model="veo-3.1-fast-generate-preview",
                     prompt=prompt_text,
-                    image=input_image,  # in batches put in above stratified images with respective prompt
-                    config=types.GenerateVideosConfig(
-                        number_of_videos = 1,
-                        durationSecond = 4
-                    )
+                    image=input_image,
+                    config={'numberOfVideos': 1, 'durationSeconds': 4}
                 )
+ 
                 active_operations.append({
                     "op": operation,
                     "filename": output_name,
@@ -69,54 +84,93 @@ def sample_img_bin ():
                     "bin": bin_id,
                     "done": False
                 })
+ 
+                generation_log.append({
+                    "video_filename": output_name,
+                    "condition": condition,
+                    "bin": bin_id,
+                    "sample_index": idx + 1,
+                    "source_image": image_filename,
+                    "prompt_key": prompt_key,
+                    "color": row['color'],
+                    "distractor_color": row.get('distractor_color'),
+                    "status": "submitted"
+                })
+ 
+                # Save log immediately after each submission
+                save_log()
+ 
+                time.sleep(35)
+ 
+    print(f"Total submitted: {submission_counter}") 
 
-# saved along structure in the directory that specefies under veo_results the condition and the bin_X; herein the filename is defined as condtion_Bin_'_SampleID.mp4
-def monitor_and_safe():
+    os.makedirs("veo_results", exist_ok=True)
+    log_df = pd.DataFrame(generation_log)
+    log_df.to_csv("veo_results/generation_log.csv", index=False)
+    print(f"Total submitted: {submission_counter}")
+
+
+def monitor_and_save():
     print(f"\nMonitoring {len(active_operations)} total video tasks...")
     completed_count = 0
     total = len(active_operations)
-
+ 
     while completed_count < total:
         for task in active_operations:
             if task.get("done"):
                 continue
-            
-            op = client.models.get_operation(task["op"].name)
-            
-            if op.done:
-                if op.error:
-                    raise RuntimeError(
-                        f"API Error during generation of {task['filename']}: "
-                        f"Code {op.error.code} - {op.error.message}. "
-                        "This may be due to safety filters or quota limits."
-                    )
-
-                if not op.response or not op.response.generated_videos:
-                    raise ValueError(f"API returned a successful 'done' status for {task['filename']} but no video data was found.")
-
-                video = op.response.generated_videos[0]
-                
-                save_dir = os.path.join("veo_results", task["condition"], f"Bin_{task['bin']}") 
+ 
+            # Refresh operation status
+            task["op"] = client.operations.get(task["op"])
+ 
+            if task["op"].done:
+                # --- Handle error from API ---
+                if task["op"].error and task["op"].error.code != 0:
+                    print(f"ERROR for {task['filename']}: {task['op'].error.message}")
+                    task["done"] = True
+                    completed_count += 1
+                    # Update log entry status to failed
+                    for entry in generation_log:
+                        if entry["video_filename"] == task["filename"]:
+                            entry["status"] = f"failed: {task['op'].error.message}"
+                    save_log()
+                    continue
+ 
+                if not task["op"].result or not task["op"].result.generated_videos:
+                    raise ValueError(f"No video returned for {task['filename']}.")
+ 
+                video = task["op"].result.generated_videos[0]
+ 
+                save_dir = os.path.join("veo_results", task["condition"], f"Bin_{task['bin']}")
                 try:
                     os.makedirs(save_dir, exist_ok=True)
                 except Exception as e:
                     raise OSError(f"Failed to create directory {save_dir}: {e}")
-
+ 
                 save_path = os.path.join(save_dir, task["filename"])
-                
                 try:
+                    client.files.download(file=video.video)
                     video.video.save(save_path)
-                    print(f"Successfully saved: {save_path}")
+                    print(f"✓ Saved ({completed_count+1}/{total}): {save_path}")
                 except Exception as e:
-                    raise IOError(f"Failed to save video to {save_path}: {e}")
-                
+                    raise IOError(f"Failed to save {save_path}: {e}")
+ 
                 task["done"] = True
                 completed_count += 1
-        
+ 
+                # Update log entry status to saved and write CSV immediately
+                for entry in generation_log:
+                    if entry["video_filename"] == task["filename"]:
+                        entry["status"] = "saved"
+                save_log()
+ 
         if completed_count < total:
             print(f"Status: {completed_count}/{total} done. Checking again in 30s...")
-            time.sleep(30)
-
-if __name__== "__main__":
+            time.sleep(35)
+ 
+    print(f"\nAll {total} videos completed successfully.")
+ 
+ 
+if __name__ == "__main__":
     sample_img_bin()
-    monitor_and_safe()
+    monitor_and_save()

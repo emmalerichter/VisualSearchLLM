@@ -1,4 +1,8 @@
 import PIL.Image
+import PIL.Image
+import base64
+import io
+from google.genai import types
 
 colourMap = {
     "#FF0000": "red", 
@@ -29,12 +33,20 @@ def constructMessage(writing, colour, distractor_color=None):
 
 
 def constructImage(full_image_path):
-    # filepath to first frame
     try:
         img = PIL.Image.open(full_image_path)
         img = img.convert("RGB")
-        img.load()
-        return img
+        
+        # Convert to base64
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG")
+        image_bytes = buffer.getvalue()
+        encoded = base64.b64encode(image_bytes).decode("utf-8")
+        
+        return types.Image(
+            image_bytes=encoded,
+            mime_type="image/jpeg"
+        )
     except FileNotFoundError:
         print(f"Error: The file at {full_image_path} was not found.")
         return None

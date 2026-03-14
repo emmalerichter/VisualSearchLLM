@@ -117,8 +117,6 @@ def generate_images(dir, num_images, distractor_set ,c, targetShape, distractorS
 
         for i in range(num_images):
 
-
-
             if colourMode == "explicit":
                 currentTargetColour = targetColour
                 currentDistractorColour = distractorColour
