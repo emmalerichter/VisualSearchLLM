@@ -2,6 +2,9 @@
 ##API key
 APIAccess.py
 
+VISION_KEY
+VISION_KEY.ppub
+
 visualSearch
 __pycache__/
 *.png

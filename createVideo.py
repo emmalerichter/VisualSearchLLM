@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import time
 from google import genai
@@ -39,18 +40,19 @@ def sample_img_bin():
  
         for bin_id in range(1, 2):
             bin_data = df[df['bin_group'] == bin_id]
- 
             if bin_data.empty:
                 raise RuntimeError(f"Bin {bin_id} in {condition} is empty.")
-            if len(bin_data) < samples_per_bin:
+            
+            unique_images = bin_data['filename'].nunique()
+            if len(unique_images) < samples_per_bin:
                 raise ValueError(f"Insufficient data in {condition} Bin {bin_id}.")
  
-            samples = bin_data.sample(n=min(len(bin_data), samples_per_bin), random_state=RANDOM_SEED)
+            sampled_images = np.random.choice(unique_images, size=samples_per_bin, replace=False, random_state=RANDOM_SEED)
  
-            for idx, (_, row) in enumerate(samples.iterrows()):
-                image_filename = row['filename']
+            for idx, image_filename in enumerate(sampled_images):
+               
                 full_image_path = os.path.join(folder_path, image_filename)
- 
+                row = bin_data[(bin_data['filename'] == image_filename) & (bin_data['target'] == True)]
                 if not os.path.exists(full_image_path):
                     raise FileNotFoundError(f"Image not found: {full_image_path}")
  
@@ -96,8 +98,6 @@ def sample_img_bin():
                     "distractor_color": row.get('distractor_color'),
                     "status": "submitted"
                 })
- 
-                # Save log immediately after each submission
                 save_log()
  
                 time.sleep(35)
@@ -129,7 +129,6 @@ def monitor_and_save():
                     print(f"ERROR for {task['filename']}: {task['op'].error.message}")
                     task["done"] = True
                     completed_count += 1
-                    # Update log entry status to failed
                     for entry in generation_log:
                         if entry["video_filename"] == task["filename"]:
                             entry["status"] = f"failed: {task['op'].error.message}"
@@ -157,8 +156,7 @@ def monitor_and_save():
  
                 task["done"] = True
                 completed_count += 1
- 
-                # Update log entry status to saved and write CSV immediately
+
                 for entry in generation_log:
                     if entry["video_filename"] == task["filename"]:
                         entry["status"] = "saved"
