@@ -1,0 +1,16 @@
+video_filename,condition,bin,sample_index,source_image,prompt_key,color,distractor_color,status
+2Among5Colour_Bin1_Sample1.mp4,2Among5Colour,1,1,image_23.png,2Among5-prompt-Col,"674    #FF0000
+Name: color, dtype: object","674    #FF0000
+Name: distractor_color, dtype: object",submitted
+2Among5Colour_Bin1_Sample2.mp4,2Among5Colour,1,2,image_34.png,2Among5-prompt-Col,"975    #FF0000
+Name: color, dtype: object","975    #FF0000
+Name: distractor_color, dtype: object",submitted
+2Among5Colour_Bin1_Sample3.mp4,2Among5Colour,1,3,image_62.png,2Among5-prompt-Col,"2088    #FF0000
+Name: color, dtype: object","2088    #FF0000
+Name: distractor_color, dtype: object",submitted
+2Among5Colour_Bin1_Sample4.mp4,2Among5Colour,1,4,image_36.png,2Among5-prompt-Col,"1065    #FF0000
+Name: color, dtype: object","1065    #FF0000
+Name: distractor_color, dtype: object",submitted
+2Among5Colour_Bin1_Sample5.mp4,2Among5Colour,1,5,image_53.png,2Among5-prompt-Col,"1679    #FF0000
+Name: color, dtype: object","1679    #FF0000
+Name: distractor_color, dtype: object",submitted

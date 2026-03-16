@@ -1,0 +1,7 @@
+trial_index,video_name,condition,bin,sample,success,failure_type,err_no_distractors,err_no_target,err_wrong_manip,err_new_target_id,err_new_target_unid,err_extra_distractors,err_font_change,err_rotation,err_movement,err_enlarge_target,err_enlarge_distractors,err_target_centre,err_circular_motion,err_merging,err_other,err_id_change_before,err_id_change_after,err_vanishing,fidelity_score_total,fidelity_omission,fidelity_numeric,fidelity_temporal,fidelity_physical_vanishing,notes,coder,timestamp
+0,"2Among5Colour_Bin1_Sample1.mp4","2Among5Colour",1,1,0,"new_generation",0,0,0,1,0,1,1,1,0,1,1,0,0,0,0,0,0,0,6,0,2,4,0,"","ER_260313","2026-03-13T15:39:24.953Z"
+1,"2Among5Colour_Bin1_Sample2.mp4","2Among5Colour",1,2,1,"",0,0,0,0,0,1,1,1,0,1,0,1,0,0,1,0,0,1,7,0,1,5,1,"micro disapperance, coding may be incongruent","ER_260313","2026-03-13T15:38:04.815Z"
+2,"2Among5Colour_Bin1_Sample3.mp4","2Among5Colour",1,3,1,"",0,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,6,0,1,5,0,"","ER_260313","2026-03-13T15:38:24.884Z"
+3,"2Among5Colour_Bin1_Sample4.mp4","2Among5Colour",1,4,1,"",0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,4,0,0,4,0,"","ER_260313","2026-03-13T15:39:14.335Z"
+4,"2Among5Colour_Bin1_Sample5.mp4","2Among5Colour",1,5,0,"new_generation",0,0,0,1,0,1,1,1,0,1,1,1,0,0,0,0,0,0,7,0,2,5,0,"seems same image as in 1","ER_260313","2026-03-13T15:40:07.284Z"
+5,"2Among5Colour_Bin1_Sample6.mp4","2Among5Colour",1,6,0,"new_generation",0,0,0,0,1,1,1,1,0,1,1,1,0,0,0,0,0,0,7,0,2,5,0,"","ER_260313","2026-03-13T15:41:24.224Z"
