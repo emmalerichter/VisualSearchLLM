@@ -846,6 +846,23 @@ if __name__ == '__main__':
     
     # Define presets as a dictionary.
     presets = {
+        "2TargetOnly": {
+            "num_images": args.number if args.number is not None else 1000,
+            "distractor_set": [(0)],
+            "c": 1,
+            "targetShape": "2",
+            "distractorShape": "5",
+            "shapeSize": 20,
+            "theta_min": 0,
+            "theta_max": 360,
+            "targetColour": "#FF0000",
+            "distractorColour": "#0000FF",
+            "quadrantOrder": [1, 2, 3, 4],
+            "debug": False,
+            "present": False,
+            "conjunctive": False,
+        },
+
         "2Among5Colour": {
             "num_images": args.number if args.number is not None else 1000,
             "distractor_set": [(1, 4), (5, 8), (9, 16), (17, 32), (33, 64), (65, 99)],
