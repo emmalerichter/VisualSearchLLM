@@ -308,6 +308,8 @@ def generate_images(dir, num_images, distractor_set ,c, targetShape, distractorS
                 filename = f'image_{i}.png'
                 #calculate the bin 
                 def bin_group_calc(k):
+                    if k == 0:
+                        return 0
                     if 1<= k <= 4 :
                         return 1
                     elif 5 <= k <= 8:
