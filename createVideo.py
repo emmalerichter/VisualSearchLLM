@@ -28,7 +28,7 @@ def save_log():
  
 def sample_img_bin():
     submission_counter = 0
- 
+    rng = np.random.default_rng(RANDOM_SEED) 
     for condition in conditions:
         folder_path = os.path.join(base_dir, condition)
         csv_path = os.path.join(folder_path, "annotations.csv")
@@ -47,7 +47,7 @@ def sample_img_bin():
             if len(unique_images) < samples_per_bin:
                 raise ValueError(f"Insufficient data in {condition} Bin {bin_id}.")
  
-            sampled_images = np.random.choice(unique_images, size=samples_per_bin, replace=False, random_state=RANDOM_SEED)
+            sampled_images = rng.choice(unique_images, size=samples_per_bin, replace=False)
  
             for idx, image_filename in enumerate(sampled_images):
                
