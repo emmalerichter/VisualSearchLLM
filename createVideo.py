@@ -57,7 +57,8 @@ def sample_img_bin():
                     raise FileNotFoundError(f"Image not found: {full_image_path}")
  
                 prompt_key = "2Among5-prompt-Conj" if "2Among5Conjunctive" in condition else \
-                             ("2Among5-prompt-Col" if "2Among5Colour" in condition else "5Among2-prompt-NoCol")
+                             ("2Among5-prompt-Col" if "2Among5Colour" in condition else \
+                              ("NoDistractors-prompt" if "NoDistractors" in condition else "5Among2-prompt-NoCol"))
  
                 prompt_text = constructMessage(
                     writing=prompt_key,
