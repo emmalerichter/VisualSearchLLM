@@ -15,8 +15,6 @@ colourMap = {
 def constructMessage(writing, colour, distractor_color=None):
     # Map Hex colors to English names
     target_color_name = colourMap.get(colour, "colored")
-    dist_color_name = colourMap.get(distractor_color, "colored") if distractor_color else "various colored"
-
     # define prompt
     prompts = { 
        "NoDistractors-prompt": (
