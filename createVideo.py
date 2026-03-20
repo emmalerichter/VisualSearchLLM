@@ -87,7 +87,7 @@ def sample_img_bin():
         
         prompt_text = constructMessage(
             writing=prompt_key,
-            colour=row['color'])
+            colour=ann_row['color'].values[0],)
         
         input_image = constructImage(full_image_path)
         if input_image is None:

@@ -12,10 +12,9 @@ colourMap = {
     "#FFFFFF": "white"
 }
 
-def constructMessage(writing, colour, distractor_color=None):
+def constructMessage(writing, colour):
     # Map Hex colors to English names
     target_color_name = colourMap.get(colour, "colored")
-    # define prompt
     prompts = { 
        "NoDistractors-prompt": (
             f"The {target_color_name} digit 2 becomes the sole focus; starting at one second, a black circle appears around it. Static camera perspective, no zoom no pan no movement no dolly no rotation."

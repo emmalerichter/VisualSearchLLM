@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import time
 from constructMessage import constructImage
-
+from constructMessage import constructMessage
 
 conditions = ["2Among5Colour", "2Among5ConjRed", "2Among5NoColour", "NoDistractors"]
 base_dir = "results/Images"
@@ -37,7 +37,6 @@ def build_or_load_plan(conditions, base_dir, samples_per_bin):
                     "condition": condition,
                     "bin": bin_id,
                     "source_image": img,
-                    "status": "pending"
                 })
     plan = pd.DataFrame(rows)
     plan.to_csv(PLAN_PATH, index=False)
@@ -77,9 +76,16 @@ def sample_img_bin():
         print(f"starting Bin {row['bin']}...")
 
         prompt_key = "2Among5-prompt-Conj" if "2Among5Conjunctive" in row['condition'] else \
-                             ("2Among5-prompt-Col" if "2Among5Colour" in row['condition'] else "5Among2-prompt-NoCol")
- 
+                             ("2Among5-prompt-Col" if "2Among5Colour" in row['condition'] else \
+                              ("NoDistractors-prompt" if "NoDistractors" in row['condition'] else "5Among2-prompt-NoCol"))
+        
+        prompt_text = constructMessage(
+            writing=prompt_key,
+            colour=ann_row['color'].values[0])
         input_image = constructImage(full_image_path)
+
+        print(f"Constructed prompt: {prompt_text}")
+
         if input_image is None:
             raise RuntimeError(f"Failed to process image: {full_image_path}")
  
@@ -122,7 +128,6 @@ def sample_img_bin():
     log_df.to_csv("veo_results/generation_log.csv", index=False)
     print(f"Total submitted: {submission_counter}")
 
- 
  
 if __name__ == "__main__":
     sample_img_bin()
