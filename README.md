@@ -25,6 +25,7 @@ Our results were created with n=10000 and we used the following presets:
 | 2Among5       | `2Among5ColourRand`<br>`2Among5NoColourRand`<br>`2Among5ConjRand`<br> `5Among2ColourRand`<br>`5Among2NoColourRand`<br>`5Among2ConjRand` |
 | Light Priors  | `LitSpheresTop`<br>`LitSpheresBottom`<br>`LitSpheresLeft`<br>`LitSpheresRight` |
 | Circle Sizes  | `CircleSizesSmall`<br>`CircleSizesMedium`<br>`CircleSizesLarge` |
+| Ctrl Condition | `2TargetOnly`
 
 
 ## Create a Batch

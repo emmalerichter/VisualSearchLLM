@@ -81,7 +81,7 @@ def sample_img_bin():
        
         print(f"starting Bin {row['bin']}...")
         
-        prompt_key = "2Among5-prompt-Conj" if "2Among5Conjunctive" in row['condition'] else \
+        prompt_key = "2Among5-prompt-Conj" if "2Among5ConjRed" in row['condition'] else \
                              ("2Among5-prompt-Col" if "2Among5Colour" in row['condition'] else \
                               ("NoDistractors-prompt" if "NoDistractors" in row['condition'] else "5Among2-prompt-NoCol"))
         
@@ -96,11 +96,12 @@ def sample_img_bin():
         output_name = row['video_filename']
         submission_counter += 1
         print(f"Submitting ({submission_counter}): {output_name}")
+         
         operation = client.models.generate_videos(
             model="veo-3.1-fast-generate-preview",
-            prompt=prompt_text,
-            image=input_image,
-            config={'numberOfVideos': 1, 'durationSeconds': 4}
+           prompt=prompt_text,
+           image=input_image,
+           config={'numberOfVideos': 1, 'durationSeconds': 4}
         )
  
         active_operations.append({
@@ -110,7 +111,7 @@ def sample_img_bin():
             "bin": row["bin"],
             "done": False
                 })
- 
+        
         generation_log.append({
             "video_filename": output_name,
             "condition": row["condition"],
