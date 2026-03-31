@@ -1,3 +1,5 @@
 video_filename,condition,bin,sample_index,source_image,prompt_key,color,distractor_color,status
-2Among5ConjRed_Bin1_Sample1.mp4,2Among5ConjRed,1,36,image_177.png,2Among5-prompt-Conj,#FF0000,,saved
-2Among5ConjRed_Bin1_Sample2.mp4,2Among5ConjRed,1,37,image_114.png,2Among5-prompt-Conj,#FF0000,,saved
+2Among5Colour_Bin1_Sample2.mp4,2Among5Colour,1,1,image_34.png,2Among5-prompt-Col,#FF0000,,saved
+2Among5Colour_Bin1_Sample3.mp4,2Among5Colour,1,2,image_62.png,2Among5-prompt-Col,#FF0000,,saved
+2Among5Colour_Bin1_Sample4.mp4,2Among5Colour,1,3,image_36.png,2Among5-prompt-Col,#FF0000,,saved
+2Among5Colour_Bin1_Sample5.mp4,2Among5Colour,1,4,image_53.png,2Among5-prompt-Col,#FF0000,,saved

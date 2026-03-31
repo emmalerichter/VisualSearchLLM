@@ -35,7 +35,7 @@ print(humans['colour_type'].unique())
 
 for condition, color in colours.items():
     data = mean_humans[mean_humans['colour_type'] == condition]
-    plt.plot(data['distractor_bin'], data['accuracy'], color=color, marker='o', ms=3, label=condition)# mean_model = model.groupby('distractor_bin')['accuracy'].mean()
+    plt.plot(data['distractor_bin'], data['accuracy'], color=color, marker='o', ms=3, label=condition) # mean_model = model.groupby('distractor_bin')['accuracy'].mean()
 # plt.plot(model['distractor_bin'], model['accuracy'], color = "#FF6961", marker='o', ms=3)
 plt.xlabel('Number of Distractors')
 plt.ylabel('Accuracy')

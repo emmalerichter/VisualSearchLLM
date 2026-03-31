@@ -1,0 +1,5 @@
+condition,success_rate,n_success,n_total
+2Among5Colour,0.4722222222222222,17,36
+2Among5ConjRed,0.16666666666666666,6,36
+2Among5NoColour,0.1388888888888889,5,36
+NoDistractors,1.0,6,6

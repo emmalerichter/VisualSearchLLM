@@ -1,0 +1,5 @@
+condition,fidelity_score_total,fidelity_omission,fidelity_numeric,fidelity_temporal,fidelity_physical_vanishing
+2Among5Colour,4.5833,0.0,0.7222,3.6389,0.2222
+2Among5ConjRed,5.3611,0.1111,1.75,3.3056,0.1944
+2Among5NoColour,5.1389,0.1389,1.1944,3.5278,0.2778
+NoDistractors,2.6667,0.0,0.0,2.6667,0.0

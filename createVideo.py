@@ -18,7 +18,7 @@ generation_log = []
 RANDOM_SEED = 36
 LOG_PATH = "veo_results/generation_log.csv"
 PLAN_PATH = "veo_results/submission_plan.csv"
-DAILY_LIMIT = 10
+DAILY_LIMIT = 4
 
  
 def build_or_load_plan(conditions, base_dir, samples_per_bin):

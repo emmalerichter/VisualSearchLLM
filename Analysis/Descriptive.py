@@ -10,4 +10,3 @@ print(humans.describe())
 print(humans['accuracy'].mean())
 print(humans.groupby('colour_type')['accuracy'].mean())
 print(humans.groupby(['colour_type', 'distractor_bin'])['accuracy'].mean())
-
