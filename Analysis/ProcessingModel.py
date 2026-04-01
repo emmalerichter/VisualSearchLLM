@@ -2,7 +2,8 @@ import pandas as pd
 
 # import all 
 imagedata = pd.read_csv("veo_results/submission_plan.csv")
-Marker1data = pd.read_csv("veo_results/coding_ER_01_2026-03-31.csv")
+Marker1data = pd.read_csv("veo_results/coding_ER_01_2026-03-31.csv", sep=';')
+
 # Marter2data = pd.read_csv("veo_results/2Among5ConjRed_coded/xyz.csv")
 annotationsColour = pd.read_csv("results/Images/2Among5Colour/annotations.csv")
 annotationsNocolour = pd.read_csv("results/Images/2Among5NoColour/annotations.csv")
@@ -31,7 +32,7 @@ AnnotatedSubmissions = AnnotatedSubmissions.dropna(subset=['video_filename'])
 AnnotatedSubmissions.to_csv("veo_results/annotatedSubmissions.csv", index=False)
 
 mergedVeo3  = AnnotatedSubmissions.merge(
-        Marker1data,
+      Marker1data,
         left_on='video_filename',
         right_on='video_name',
         how='left'
