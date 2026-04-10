@@ -1,0 +1,16 @@
+trial_index,video_name,condition,bin,sample,success,failure_type,err_no_distractors,err_no_target,err_wrong_manip,err_new_target_id,err_new_target_unid,err_extra_distractors,err_font_change,err_rotation,err_movement,err_enlarge_target,err_enlarge_distractors,err_target_centre,err_circular_motion,err_merging,err_id_change_before,err_id_change_after,err_vanishing,fidelity_score_total,fidelity_omission,fidelity_numeric,fidelity_temporal,fidelity_physical_vanishing,notes,coder,timestamp
+0,2Among5Colour_Bin3_Sample1.mp4,2Among5Colour,3,1,1,,0,0,0,0,0,1,1,0,0,1,1,1,0,0,0,0,0,5,0,1,4,0,,FR_01,2026-04-05T19:30:17.620Z
+1,2Among5Colour_Bin3_Sample4.mp4,2Among5Colour,3,4,0,ambiguity,0,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,5,0,1,4,0,,FR_01,2026-04-05T19:30:46.617Z
+2,2Among5Colour_Bin3_Sample5.mp4,2Among5Colour,3,5,0,ambiguity,0,0,0,1,0,1,1,0,0,1,0,0,1,1,0,0,0,6,0,2,4,0,,FR_01,2026-04-05T19:31:09.933Z
+3,2Among5Colour_Bin4_Sample2.mp4,2Among5Colour,4,2,0,ambiguity,0,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,5,0,1,4,0,,FR_01,2026-04-05T19:31:33.715Z
+4,2Among5Colour_Bin4_Sample5.mp4,2Among5Colour,4,5,1,,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,,FR_01,2026-04-05T19:31:42.896Z
+5,2Among5Colour_Bin4_Sample6.mp4,2Among5Colour,4,6,0,ambiguity,0,0,0,0,0,0,1,1,0,1,0,0,1,0,0,0,0,4,0,0,4,0,,FR_01,2026-04-05T19:32:12.311Z
+6,2Among5Colour_Bin5_Sample2.mp4,2Among5Colour,5,2,0,ambiguity,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,4,0,1,3,0,,FR_01,2026-04-05T19:32:33.745Z
+7,2Among5Colour_Bin5_Sample4.mp4,2Among5Colour,5,4,0,ambiguity,0,0,0,0,0,0,1,1,0,1,0,1,0,0,0,0,0,4,0,0,4,0,,FR_01,2026-04-05T19:32:47.169Z
+8,2Among5Colour_Bin5_Sample5.mp4,2Among5Colour,5,5,0,ambiguity,0,0,0,0,0,1,1,1,0,1,0,1,0,0,0,0,0,5,0,1,4,0,,FR_01,2026-04-05T19:33:08.526Z
+9,2Among5Colour_Bin6_Sample1.mp4,2Among5Colour,6,1,0,ambiguity,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,3,0,0,3,0,zoom in on the scene ,FR_01,2026-04-05T19:33:30.208Z
+10,2Among5Colour_Bin6_Sample4.mp4,2Among5Colour,6,4,0,ambiguity,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,2,0,0,2,0,,FR_01,2026-04-05T19:33:39.405Z
+11,2Among5Colour_Bin6_Sample5.mp4,2Among5Colour,6,5,0,ambiguity,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,3,0,0,3,0,,FR_01,2026-04-05T19:34:00.555Z
+12,2Among5ConjRed_Bin2_Sample1.mp4,2Among5ConjRed,2,1,0,ambiguity,0,0,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0,4,0,2,2,0,,FR_01,2026-04-05T19:35:52.531Z
+13,2Among5NoColour_Bin1_Sample4.mp4,2Among5NoColour,1,4,0,new_generation,1,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,4,1,2,1,0,,FR_01,2026-04-05T19:36:28.781Z
+14,2Among5NoColour_Bin4_Sample5.mp4,2Among5NoColour,4,5,0,ambiguity,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,3,1,0,2,0,,FR_01,2026-04-05T19:29:52.036Z
