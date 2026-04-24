@@ -41,51 +41,60 @@ mergedVeo3  = AnnotatedSubmissions.merge(
 mergedVeo3 = mergedVeo3.drop(columns=['video_name', 'filename', 'condition_y'])
 mergedVeo3 = mergedVeo3.rename(columns={'condition_x': 'condition'})
 mergedVeo3 = mergedVeo3[mergedVeo3['target'] == True]
+print([col for col in mergedVeo3.columns if col.startswith('err_')])
 # edit fidelity scores as of true grouping 
-## drop old
+## drop old mapping
 mergedVeo3 = mergedVeo3.drop(columns=[
-    'fidelity_score_total', 'fidelity_omission', 'fidelity_numeric', 
-    'fidelity_temporal', 'fidelity_physical_vanishing'
+    'fidelity_score_total', 'fidelity_omission', 'fidelity_numeric',
+    'fidelity_temporal', 'fidelity_physical_vanishing',
+    'fidelity_missing', 'fidelity_incorrect',
+    'fidelity_size_style', 'fidelity_movement', 'fidelity_manipulation',
+    'fidelity_addition'
 ], errors='ignore')
-# --- Category mappings ---
 
-missing_elements = {
-'omission_error': ['err_no_distractors', 'err_no_target', 'err_wrong_manip'],  # No Distractors, No Targets, No Identification
-'temporal_incongruence': ['err_id_change_before', 'err_id_change_after', 'err_vanishing']  # Before, After, Intermittent Disappearance
-}
+# --- Category mappings (aligned to Table 1) ---
 
-incorrect_elements = {
-'manipulation_error': {
-'size_style': ['err_enlarge_target', 'err_merging', 'err_enlarge_distractors', 'err_font_change'],  # Target Enlarges, Merging, Distractors Enlarge, Font Changes
-'movement':   ['err_rotation', 'err_target_centre', 'err_movement']  # Numbers Rotate Upright, Target Moves To Centre/Corner, Other Movement
-    },
+# Omission Errors (n=3): Never displays distractors, Never displays targets, Lack of identification strategy
+omission_cols = ['err_no_distractors', 'err_no_target', 'err_wrong_manip']
 
-'addition_error': {
-'new_target':      ['err_new_target_id', 'err_new_target_unid'],  # Identified, Not Identified
-'new_distractors': ['err_extra_distractors']
-    }
-}
+# Addition Errors (n=3): New target identified, New target not identified, New distractors generated
+addition_cols = ['err_new_target_id', 'err_new_target_unid', 'err_extra_distractors']
 
-# --- Missing Elements ---
-mergedVeo3['fidelity_omission']  = mergedVeo3[missing_elements['omission_error']].sum(axis=1)
-mergedVeo3['fidelity_temporal']  = mergedVeo3[missing_elements['temporal_incongruence']].sum(axis=1)
-mergedVeo3['fidelity_missing']   = mergedVeo3[missing_elements['omission_error'] + missing_elements['temporal_incongruence']].sum(axis=1)
+# Manipulation Errors (n=8): Font changes, Numbers rotate upright, Elements merge,
+#   Enlarge target, Enlarge distractors, Targets move in scene, Distractors move, Full scene movement
+manipulation_cols = [
+    'err_font_change',         # Font changes
+    'err_rotation',            # Numbers rotate upright
+    'err_merging',             # Elements merge
+    'err_enlarge_target',      # Enlarging of: Target
+    'err_enlarge_distractors', # Enlarging of: Distractors
+    'err_target_centre',       # Movement of: Targets in Scene (e.g. to centre)
+    'err_circular_motion',     # Movement of: Full Scene (e.g. rotating)
+    'err_movement',            # Movement of: Distractors (e.g. rotating)
+]
 
-# --- Incorrect Elements ---
-mergedVeo3['fidelity_size_style']   = mergedVeo3[incorrect_elements['manipulation_error']['size_style']].sum(axis=1)
-mergedVeo3['fidelity_movement']     = mergedVeo3[incorrect_elements['manipulation_error']['movement']].sum(axis=1)
-mergedVeo3['fidelity_manipulation'] = mergedVeo3['fidelity_size_style'] + mergedVeo3['fidelity_movement']
-mergedVeo3['fidelity_addition']     = mergedVeo3[
-incorrect_elements['addition_error']['new_target'] +
-incorrect_elements['addition_error']['new_distractors']
-].sum(axis=1)
-mergedVeo3['fidelity_incorrect']    = mergedVeo3['fidelity_manipulation'] + mergedVeo3['fidelity_addition']
+# Temporal Incongruence Errors (n=3): After identification, Before identification, Intermittent disappearance
+temporal_cols = ['err_id_change_after', 'err_id_change_before', 'err_vanishing']
 
-# --- Total ---
-mergedVeo3['fidelity_score_total'] = mergedVeo3['fidelity_missing'] + mergedVeo3['fidelity_incorrect']
-print(mergedVeo3[['fidelity_omission', 'fidelity_temporal', 'fidelity_missing',
-'fidelity_size_style', 'fidelity_movement', 'fidelity_manipulation',
-'fidelity_addition', 'fidelity_incorrect', 'fidelity_score_total']].describe())
+# --- Compute category scores ---
+mergedVeo3['fidelity_omission']     = mergedVeo3[omission_cols].sum(axis=1)
+mergedVeo3['fidelity_addition']     = mergedVeo3[addition_cols].sum(axis=1)
+mergedVeo3['fidelity_manipulation'] = mergedVeo3[manipulation_cols].sum(axis=1)
+mergedVeo3['fidelity_temporal']     = mergedVeo3[temporal_cols].sum(axis=1)
+
+# --- Total (max possible = 17) ---
+mergedVeo3['fidelity_score_total'] = (
+    mergedVeo3['fidelity_omission'] +
+    mergedVeo3['fidelity_addition'] +
+    mergedVeo3['fidelity_manipulation'] +
+    mergedVeo3['fidelity_temporal']
+)
+
+print(mergedVeo3[[
+    'fidelity_omission', 'fidelity_addition',
+    'fidelity_manipulation', 'fidelity_temporal',
+    'fidelity_score_total'
+]].describe())
 
 mergedVeo3.to_csv("veo_results/mergedVeo3.csv", index=False)
 
@@ -111,6 +120,9 @@ print(Marker2data[Marker2data['video_name_DK'].isin([
     '2Among5NoColour_Bin1_Sample2.mp4'
 ])][['video_name_DK', 'fidelity_score_total_DK', 'success_DK']])
 
+Marker3data = pd.read_csv("veo_results/coding_FR_01_2026-04-05.csv", sep=',')
+Marker3data = Marker3data.add_suffix('_FR')
+
 
 MarkerMerged = Marker1data.merge(
     Marker2data,
@@ -119,6 +131,14 @@ MarkerMerged = Marker1data.merge(
     how='left'
 )
 MarkerMerged.to_csv("analysis/MarkerMerged.csv")
+
+MarkerMerged2 = MarkerMerged.merge(
+    Marker3data,
+    left_on='video_name',
+    right_on='video_name_FR',
+    how='left'
+)
+MarkerMerged2.to_csv("analysis/MarkerMerged2.csv")
 
 ## Human data
 HumanData = pd.read_csv("humanResults/e1_numbers_processed.csv")

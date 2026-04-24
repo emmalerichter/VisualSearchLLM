@@ -1,9 +1,0 @@
-condition,failure_type,count
-2Among5Colour,ambiguity,11
-2Among5Colour,new_generation,7
-2Among5ConjRed,ambiguity,1
-2Among5ConjRed,location,1
-2Among5ConjRed,new_generation,26
-2Among5NoColour,ambiguity,2
-2Among5NoColour,location,1
-2Among5NoColour,new_generation,28
