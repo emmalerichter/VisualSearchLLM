@@ -1,7 +1,7 @@
 
 # VisualSearchLLM
 
-This code is for investigating the pop-out effect in Visual AI systems.
+This code is for investigating the pop-out effect in Visual AI systems. And was adapted to specifically probe generative video models as a dissertation project that focussed on spatial configuration search. 
 
 To run this code from scratch to replicate our results the following should be done:
 
@@ -13,75 +13,34 @@ To run this code from scratch to replicate our results the following should be d
 
 ## Generate Images
 
-The dataset of images with varying visual processing demands.
+The dataset of images with varying visual processing demands. Image ratio is fitted as a 9:16 ratio 
 The datasets can be created using the generateImages.py file. 
 The intended use is `python generateImages.py -n x -d x -p x`
 where `-n` is the flag for the number of images to create, `-d` is the directory to store the images, and `-p` is a selection from preset options configuring the images created. More control over the images generated is possible using other flags.
 
-Our results were created with n=10000 and we used the following presets:
+The presented results only consider the 2Among5ColourRand, 2Among5NoColourRand and 2Among5ConjRand conditions. 
+
 
 | Experiment Type     | Presets to Use                          |
 |---------------------|------------------------------------------|
-| 2Among5       | `2Among5ColourRand`<br>`2Among5NoColourRand`<br>`2Among5ConjRand`<br> `5Among2ColourRand`<br>`5Among2NoColourRand`<br>`5Among2ConjRand` |
+| 2Among5       | `2Among5ColourRand`<br>`2Among5NoColourRand`<br>`2Among5ConjRand`<br> `5Among2ColourRand`<br>`5Among2NoColourRand`<br>`5Among2ConjRand` <br> `NoDisctractors` |
 | Light Priors  | `LitSpheresTop`<br>`LitSpheresBottom`<br>`LitSpheresLeft`<br>`LitSpheresRight` |
 | Circle Sizes  | `CircleSizesSmall`<br>`CircleSizesMedium`<br>`CircleSizesLarge` |
 | Ctrl Condition | `2TargetOnly`
 
 
-## Create a Batch
+## API requests
 
-For OpenAI and Anthropic models we can take advantage of Batching to reduce costs. To do this we need to prepare all of the requests ahead of time.
-We can do this with `python createBatch.py -d x -m x -p x`
-where the `-d` flag gives the directory; `-m` the model (see supported model list), `-p` gives the prompt to provide as an element from the list in `constructMessage.py`
-This creates an appropriate number of `.jsonl` files for the batching (there is a maximum number of requests per batch we frequently exceed).
+API requests can be handeled in the `constructVideo.py`. The present experimetn specified use of Gemini's Veo 3.1 fast, as well as a duration of videos of 4 seconds. 
+Our results were created with the prompt preset defined in `constructMessage.py`
 
-Our results were created with the following prompt presets (found in `constructMessage.py`)
+# Video Processing
+Videos are marked by hand, using the following website's tool: https://emmalerichter.github.io/dissertation/video-coder.html
+To turn the results into a more readable format first processing was performed in `ProcessingModel.py` this includes merging of the image, video and marker data.
 
-| Cells | Presets to Use                          |
+## Restults Analysis 
+Results are analyised in R, along the three hypothesis. Files associated with data analysis are 
+| Datatype   | file to use                          |
 |---------------------|------------------------------------------|
-| (2Among5)  Disjunctive <br> Shape Conjunctive     | `std2x2-2Among5`<br> `std2x2-5Among2` |
-| (2Among5) Shape-Colour Conjunctive | `std2x2-2Among5-conj` |
-| Light Priors  | `LightPriorsOOO` |
-| Circle Sizes  | `circle-sizes` |
-
-
-
-| Coordinates | Presets to Use                          |
-|---------------------|------------------------------------------|
-| (2Among5)  Disjunctive <br> Shape Conjunctive    | `coords-2Among5`<br> `coords-5Among2` |
-| (2Among5) Shape-Colour Conjunctive | `coords-2Among5-conj` |
-| Light Priors  | `coords-LightPriorsOOO`|
-| Circle Sizes  | `coords-circle-sizes` |
-
-
-
-## Submit a Batch
-To actually submit the batch to Anthropic/OpenAI:
-`python submitBatch.py -d x -m x`
-This will handle the creation of a job with the batching provider and save the appropriate log numbers for retrieval later.
-Similarly, for Llama, `python submitHPCBatch.py -d x -m x` will submit the batch to SLURM. Users will need to provide their own appropriately set up SLURM script .sh file, as this will vary from system to system. Alternatively, the runLlama.py file can run the models locally if appropriate hardware is available.
-
-
-## Checking on / Finishing a Batch
-For the Anthropic/OpenAI models, batches occur asynchronously, seemingly whenever the providers have available compute. To check the progress of a batch use
-`python checkBatchProgress.py -d x -m x`
-This will display, for each batch, the number of requests completed. Once all batches are complete, the results files will be downloaded.
-If running a request locally or on an HPC you'll need to look up how to check when your batch is done yourself.
-
-## Processing Batch Results
-To turn the batch results into a more readable format we need to pocess them. To do this we use
-`python processBatchResults.py -d x -m x` 
-We have a few extra options depending on whether we are expecting the results to be coordinates or cells.
-Either `-c`, `-rc`.
-The script `processAllJobs.py` can let you select models to process batch results for multiple models in sequence.
-
-
-
-## Presenting the Results
-`analyseResults.py` is the main script for visualising results. Usage looks like
-`python analyseResults.py -d <d1, d2, d3,d4...>, <l1,l2,l3,l4...> -g group1:d1,d2 group2:d3,d4 --mode m`
-where `<d1,...>` is list of directories which results you want to compare, `<l1,..>` is a list of labels, and `groupx: d1,d2` names a new group, groupx and merges d1 and d2's results into a single blob. 
-This is useful e.g., when wanting to merge 2Among5 and 5Among2.
-
-## Mechanistic Interpretability
-For analyzing internal model activations and training linear probes, use the scripts in the `scripts/` directory. The main workflow is: (1) extract activations during inference by setting `EXTRACT_ACTIVATIONS=1`, (2) train probes with `scripts/train_on_activations.py --experiments <exp1> <exp2> --model llama90B --categories residual_stream --test per_layer combined`, and (3) test hypotheses with `scripts/test_hypotheses.py --model llama90B`. Additional utilities include `scripts/probe_attribution.py` for computing feature importance, `scripts/inspect_activations.py` for examining saved activations, and `scripts/clutter_aware_popout.py` for analyzing the effect of clutter. For an automated pipeline on SLURM use `scripts/run_llama_local_pipeline.py --model llama90B --num 150 --experiments <exp1> <exp2>`. Configuration paths are set in `rds6_config.py`.
+| Ambiguity coded as failure     | `HypothesisTesting.ipynb` |
+| Ambiguity coded as success  | `HypothesisTestingAS.ipynb` |
